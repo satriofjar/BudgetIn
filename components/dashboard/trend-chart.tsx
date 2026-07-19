@@ -28,22 +28,6 @@ function compactRupiah(value: number) {
   return String(value);
 }
 
-function makeEndLabel(name: string) {
-  return function EndLabel(props: {
-    x?: string | number;
-    y?: string | number;
-    index?: number;
-  }) {
-    const { x, y, index } = props;
-    if (index !== 11 || x === undefined || y === undefined) return null;
-    return (
-      <text x={Number(x) + 6} y={Number(y)} dy={4} fontSize={11} fill="var(--muted-foreground)">
-        {name}
-      </text>
-    );
-  };
-}
-
 export function TrendChart({ income, expense, investment }: TrendChartProps) {
   const data = SHORT_MONTHS.map((month, i) => ({
     month,
@@ -60,7 +44,7 @@ export function TrendChart({ income, expense, investment }: TrendChartProps) {
       <CardContent>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
+            <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
               <YAxis
@@ -84,7 +68,6 @@ export function TrendChart({ income, expense, investment }: TrendChartProps) {
                 stroke="var(--chart-income)"
                 strokeWidth={2}
                 dot={{ r: 3 }}
-                label={makeEndLabel("Income")}
               />
               <Line
                 type="monotone"
@@ -92,7 +75,6 @@ export function TrendChart({ income, expense, investment }: TrendChartProps) {
                 stroke="var(--chart-expense)"
                 strokeWidth={2}
                 dot={{ r: 3 }}
-                label={makeEndLabel("Expense")}
               />
               <Line
                 type="monotone"
@@ -100,7 +82,6 @@ export function TrendChart({ income, expense, investment }: TrendChartProps) {
                 stroke="var(--chart-investment)"
                 strokeWidth={2}
                 dot={{ r: 3 }}
-                label={makeEndLabel("Investment")}
               />
             </LineChart>
           </ResponsiveContainer>
