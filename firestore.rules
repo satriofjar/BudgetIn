@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidCategoryCreate() {
+      let data = request.resource.data;
+      return data.transactionCount == 0
+        && data.name is string && data.name.size() > 0
+        && data.type in ['expense', 'income', 'investment']
+        && data.plannedBudget is number && data.plannedBudget >= 0;
+    }
+
+    function isValidCategoryUpdate() {
+      let data = request.resource.data;
+      let before = resource.data;
+      return data.name is string && data.name.size() > 0
+        && data.type == before.type
+        && data.plannedBudget is number && data.plannedBudget >= 0
+        && (data.transactionCount == before.transactionCount
+            || data.transactionCount == before.transactionCount + 1
+            || data.transactionCount == before.transactionCount - 1);
+    }
+
+    function categoryPath(userId, categoryId) {
+      return /databases/$(database)/documents/users/$(userId)/categories/$(categoryId);
+    }
+
+    function isValidTransactionCreate(userId) {
+      let catId = request.resource.data.categoryId;
+      return getAfter(categoryPath(userId, catId)).data.transactionCount
+        == get(categoryPath(userId, catId)).data.transactionCount + 1;
+    }
+
+    function isValidTransactionDelete(userId) {
+      let catId = resource.data.categoryId;
+      return getAfter(categoryPath(userId, catId)).data.transactionCount
+        == get(categoryPath(userId, catId)).data.transactionCount - 1;
+    }
+
+    function isValidTransactionUpdate(userId) {
+      let before = resource.data;
+      let after = request.resource.data;
+      return before.categoryId == after.categoryId || (
+        getAfter(categoryPath(userId, after.categoryId)).data.transactionCount
+          == get(categoryPath(userId, after.categoryId)).data.transactionCount + 1
+        && getAfter(categoryPath(userId, before.categoryId)).data.transactionCount
+          == get(categoryPath(userId, before.categoryId)).data.transactionCount - 1
+      );
+    }
+
+    match /users/{userId} {
+      allow read, update: if isOwner(userId);
+      allow create: if isOwner(userId);
+
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidCategoryCreate();
+        allow update: if isOwner(userId) && isValidCategoryUpdate();
+        allow delete: if isOwner(userId) && resource.data.transactionCount == 0;
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransactionCreate(userId);
+        allow update: if isOwner(userId) && isValidTransactionUpdate(userId);
+        allow delete: if isOwner(userId) && isValidTransactionDelete(userId);
+      }
+    }
+  }
+}

@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BudgetIn
 
-## Getting Started
+A personal finance tracker for income, expenses, and investments — with per-category monthly budgets and monthly/yearly dashboards. Multi-user, with each user's data kept fully private.
 
-First, run the development server:
+## Features
+
+- **Dashboard** — monthly and yearly summaries: total income/expense/investment, current month balance (auto-carried over from prior months), total saving, excess fun money, per-category planned-vs-actual breakdown with over-budget indicators, expense composition chart, and a yearly income/expense/investment trend chart.
+- **Transactions** — add, edit, delete, search, and filter (by period, type, category) with pagination and CSV export.
+- **Categories** — fully custom per-user categories (expense / income / investment) with a monthly planned budget and optional notes. A category still referenced by transactions can't be deleted.
+- **Auth** — Google Sign-In via Firebase Authentication; all data is scoped and isolated per user.
+
+## Tech stack
+
+- [Next.js](https://nextjs.org) (App Router) + TypeScript
+- [Tailwind CSS](https://tailwindcss.com) v4 + [shadcn/ui](https://ui.shadcn.com) (built on [Base UI](https://base-ui.com))
+- [Firebase](https://firebase.google.com) — Firestore (data) + Authentication (Google Sign-In)
+- [Recharts](https://recharts.org) for charts, [react-hook-form](https://react-hook-form.com) + [Zod](https://zod.dev) for forms
+
+## Getting started
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up Firebase
+
+Create a project at the [Firebase console](https://console.firebase.google.com), then:
+
+- Enable **Authentication → Sign-in method → Google**.
+- Create a **Firestore** database.
+- Under **Project settings → Your apps**, add a Web app and copy its config values.
+
+Copy `.env.local.example` to `.env.local` and fill in the values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+```
+
+### 3. Deploy Firestore security rules and indexes
+
+Publish the contents of [`firestore.rules`](./firestore.rules) via **Firestore Database → Rules** in the console (or `firebase deploy --only firestore:rules` if you have the Firebase CLI set up).
+
+Composite indexes are defined in [`firestore.indexes.json`](./firestore.indexes.json). If you don't deploy them upfront, Firestore will surface a direct "create index" link in the browser console the first time a query needs one — just click it.
+
+### 4. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the local dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | Lint the codebase |
 
-## Learn More
+## Data model
 
-To learn more about Next.js, take a look at the following resources:
+All data lives under a per-user scope in Firestore:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+users/{userId}
+users/{userId}/categories/{categoryId}    # name, type, plannedBudget, notes
+users/{userId}/transactions/{transactionId}  # date, type, categoryId, description, amount
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Categories have three parallel types — `expense`, `income`, `investment` — each fully custom per user (no locked default list). Security rules enforce that a category can't be deleted while transactions still reference it, and that users can only ever read or write their own data.
 
-## Deploy on Vercel
+## Formulas
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Total Saving** = Income − Expense
+- **Excess Fun Money** = Income − Expense − Investment
+- **Current month balance** = prior months' carried-over balance + Income − Expense − Investment
