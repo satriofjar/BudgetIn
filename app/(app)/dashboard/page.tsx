@@ -57,7 +57,7 @@ export default function DashboardPage() {
               income={monthlySummary.income}
               expense={monthlySummary.expense}
               investment={monthlySummary.investment}
-              saldoBulanIni={monthlySummary.saldoBulanIni}
+              currentMonthBalance={monthlySummary.currentMonthBalance}
               totalSaving={monthlySummary.totalSaving}
               excessFunMoney={monthlySummary.excessFunMoney}
             />

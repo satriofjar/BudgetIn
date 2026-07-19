@@ -13,7 +13,7 @@ export interface MonthlySummary {
   expense: number;
   investment: number;
   carryOverBalance: number;
-  saldoBulanIni: number;
+  currentMonthBalance: number;
   totalSaving: number;
   excessFunMoney: number;
   breakdown: Record<CategoryType, CategoryBreakdownRow[]>;

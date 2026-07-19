@@ -65,14 +65,14 @@ export async function computeMonthlySummary(
 
   const totalSaving = income - expense;
   const excessFunMoney = income - expense - investment;
-  const saldoBulanIni = carryOverBalance + income - expense - investment;
+  const currentMonthBalance = carryOverBalance + income - expense - investment;
 
   return {
     income,
     expense,
     investment,
     carryOverBalance,
-    saldoBulanIni,
+    currentMonthBalance,
     totalSaving,
     excessFunMoney,
     breakdown: {

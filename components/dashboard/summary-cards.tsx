@@ -24,7 +24,7 @@ interface SummaryCardsProps {
   income: number;
   expense: number;
   investment: number;
-  saldoBulanIni: number;
+  currentMonthBalance: number;
   totalSaving: number;
   excessFunMoney: number;
 }
@@ -33,7 +33,7 @@ export function SummaryCards({
   income,
   expense,
   investment,
-  saldoBulanIni,
+  currentMonthBalance,
   totalSaving,
   excessFunMoney,
 }: SummaryCardsProps) {
@@ -46,7 +46,7 @@ export function SummaryCards({
         value={investment}
         colorClassName="text-[var(--chart-investment)]"
       />
-      <StatTile label="Saldo Bulan Ini" value={saldoBulanIni} />
+      <StatTile label="Current Month Balance" value={currentMonthBalance} />
       <StatTile label="Total Saving" value={totalSaving} />
       <StatTile label="Excess Fun Money" value={excessFunMoney} />
     </div>
