@@ -45,3 +45,6 @@ next-env.d.ts
 CLAUDE.md
 AGENTS.md
 PRD-BudgetIn.md
+
+.vercel
+.env*

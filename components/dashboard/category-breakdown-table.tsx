@@ -11,17 +11,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatRupiah } from "@/lib/utils/format";
+import type { CategoryType } from "@/types/category";
 import type { CategoryBreakdownRow } from "@/types/dashboard";
 
 interface CategoryBreakdownTableProps {
   title: string;
+  type: CategoryType;
   rows: CategoryBreakdownRow[];
 }
 
-export function CategoryBreakdownTable({ title, rows }: CategoryBreakdownTableProps) {
+export function CategoryBreakdownTable({ title, type, rows }: CategoryBreakdownTableProps) {
   const totalPlanned = rows.reduce((s, r) => s + r.planned, 0);
   const totalActual = rows.reduce((s, r) => s + r.actual, 0);
-  const totalDiff = totalPlanned - totalActual;
+  const totalDiff = rows.reduce((s, r) => s + r.diff, 0);
 
   return (
     <Card>
@@ -38,12 +40,13 @@ export function CategoryBreakdownTable({ title, rows }: CategoryBreakdownTablePr
                 <TableHead>Category</TableHead>
                 <TableHead className="text-right">Planned</TableHead>
                 <TableHead className="text-right">Actual</TableHead>
-                <TableHead className="text-right">Diff</TableHead>
+                <TableHead className="text-right">Difference</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row) => {
-                const overBudget = row.actual > row.planned;
+                const isBad = row.diff < 0;
+                const overBudget = type === "expense" && isBad;
                 return (
                   <TableRow key={row.categoryId}>
                     <TableCell className="font-medium">
@@ -56,11 +59,11 @@ export function CategoryBreakdownTable({ title, rows }: CategoryBreakdownTablePr
                       )}
                     </TableCell>
                     <TableCell className="text-right">{formatRupiah(row.planned)}</TableCell>
-                    <TableCell className={`text-right ${overBudget ? "text-destructive font-medium" : ""}`}>
+                    <TableCell className={`text-right ${isBad ? "text-destructive font-medium" : ""}`}>
                       {formatRupiah(row.actual)}
                     </TableCell>
                     <TableCell
-                      className={`text-right ${row.diff < 0 ? "text-destructive" : "text-muted-foreground"}`}
+                      className={`text-right ${isBad ? "text-destructive" : "text-muted-foreground"}`}
                     >
                       {formatRupiah(row.diff)}
                     </TableCell>

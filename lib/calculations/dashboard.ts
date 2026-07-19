@@ -35,12 +35,15 @@ function buildBreakdown(
       const actual = transactions
         .filter((t) => t.categoryId === cat.id)
         .reduce((total, t) => total + t.amount, 0);
+      // For expense, exceeding the plan is bad (diff = planned - actual).
+      // For income/investment, exceeding the plan is good (diff = actual - planned).
+      const diff = type === "expense" ? cat.plannedBudget - actual : actual - cat.plannedBudget;
       return {
         categoryId: cat.id,
         categoryName: cat.name,
         planned: cat.plannedBudget,
         actual,
-        diff: cat.plannedBudget - actual,
+        diff,
       };
     });
 }

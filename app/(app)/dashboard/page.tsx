@@ -63,10 +63,19 @@ export default function DashboardPage() {
             />
             <ExpensePieChart rows={monthlySummary.breakdown.expense} />
             <div className="flex flex-col gap-4">
-              <CategoryBreakdownTable title="Expense" rows={monthlySummary.breakdown.expense} />
-              <CategoryBreakdownTable title="Income" rows={monthlySummary.breakdown.income} />
+              <CategoryBreakdownTable
+                title="Expense"
+                type="expense"
+                rows={monthlySummary.breakdown.expense}
+              />
+              <CategoryBreakdownTable
+                title="Income"
+                type="income"
+                rows={monthlySummary.breakdown.income}
+              />
               <CategoryBreakdownTable
                 title="Investment"
+                type="investment"
                 rows={monthlySummary.breakdown.investment}
               />
             </div>
